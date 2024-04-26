@@ -339,6 +339,26 @@ def play_rent_card(player, rent_card, players, discard_deck):
         add_card_to_hand(discard_deck, rent_card)
 
 
+# More Action Functions
+def pass_go(player, pass_go_card, deck, discard_deck):
+    action_prompt = "Would you like to pass go or play this card as money?\n" \
+                    "1: Pass go\n" \
+                    "2: Play this card as money\n"
+    while True:  # Keep prompting until valid input is provided
+        user_input = input(action_prompt)
+        if user_input == '1':
+            draw_cards(deck, player, 2)
+            remove_card_from_hand(player['private_hand'], pass_go_card)
+            add_card_to_hand(discard_deck, pass_go_card)
+            player['move_count'] += 1
+            return
+        elif user_input == '2':
+            place_money(player, pass_go_card)
+            return
+        else:
+            print("Invalid input. Please enter a valid number.")
+
+
 # Function for prompting the player for a decision
 def player_decision(player):
     actions = ['End Turn', 'Discard Card']
@@ -442,7 +462,7 @@ def run_game():
                     play_rent_card(player, decision, players, discard_deck)
 
                 elif decision['name'] == 'Pass Go':
-                    pass
+                    pass_go(player, decision, deck, discard_deck)
 
                 else:
                     print("Invalid action:", decision)
