@@ -378,6 +378,28 @@ def birthday(player, players, birthday_card, discard_deck):
         else:
             print("Invalid input. Please enter a valid number.")
 
+
+def debt_collector(player, players, debt_collector_card, discard_deck):
+    action_prompt = "Would you like to collect your debt or play this card as money?\n" \
+                    "1: Collect your debt\n" \
+                    "2: Play this card as money\n"
+    while True:  # Keep prompting until valid input is provided
+        user_input = input(action_prompt)
+        if user_input == '1':
+            payers = [x for x in players if x != player]
+            payers = [prompt_pick_player(player, payers)]
+            charge_rent(player, payers, 5)
+            remove_card_from_hand(player['private_hand'], debt_collector_card)
+            add_card_to_hand(discard_deck, debt_collector_card)
+            player['move_count'] += 1
+            return
+        elif user_input == '2':
+            place_money(player, debt_collector_card)
+            return
+        else:
+            print("Invalid input. Please enter a valid number.")
+
+
 # Function for prompting the player for a decision
 def player_decision(player):
     actions = ['End Turn', 'Discard Card']
@@ -485,6 +507,9 @@ def run_game():
 
                 elif decision['name'] == 'Birthday!':
                     birthday(player, players, decision, discard_deck)
+
+                elif decision['name'] == 'Debt Collector':
+                    debt_collector(player, players, decision, discard_deck)
 
                 else:
                     print("Invalid action:", decision)
