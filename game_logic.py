@@ -64,23 +64,28 @@ def discard_card(player, discard_deck):
     for i, card in enumerate(player['private_hand']):
         action_prompt += "Enter '{}': {}\n".format(i, card['name'])
 
-    user_input = input(action_prompt)
-    if user_input.isdigit() and 0 <= int(user_input) < len(player['private_hand']):
-        selected_card = player['private_hand'][int(user_input)]
-        discard_card_helper(selected_card, player, discard_deck)
-    else:
-        return "Invalid input. Please enter a valid number."
+    while True:  # Keep prompting until valid input is provided
+        user_input = input(action_prompt)
+        if user_input.isdigit() and 0 <= int(user_input) < len(player['private_hand']):
+            selected_card = player['private_hand'][int(user_input)]
+            discard_card_helper(selected_card, player, discard_deck)
+            break  # Exit the loop once a valid card is selected and discarded
+        else:
+            print("Invalid input. Please enter a valid number.")
 
 
 # Function to prompt the player to choose another player
 def prompt_pick_player(player, players_list):
-    action_prompt = "{}, pick another player\n.".format(player['name'])
-    for i, player in enumerate(players_list):
-        action_prompt += "Enter '{}': {}\n".format(i, player['name'])
-    user_input = input(action_prompt)
-    if user_input.isdigit() and 0 <= int(user_input) < len(players_list):
-        selected_player = players_list[int(user_input)]
-    return selected_player
+    action_prompt = "{}, pick another player.\n".format(player['name'])
+    for i, other_player in enumerate(players_list):
+        action_prompt += "Enter '{}': {}\n".format(i, other_player['name'])
+    while True:  # Keep prompting until valid input is provided
+        user_input = input(action_prompt)
+        if user_input.isdigit() and 0 <= int(user_input) < len(players_list):
+            selected_player = players_list[int(user_input)]
+            return selected_player
+        else:
+            print("Invalid input. Please enter a valid number.")
 
 
 # Functions for placing properties and money
@@ -133,14 +138,19 @@ def prompt_property_color_choice(player, property_card):
     else:
         for color in property_card['colors_available']:
             color_choices.append(color)
+
     action_prompt = "What color would you like to assign to the wild card? \n"
     for i, action in enumerate(color_choices):
         action_prompt += "Enter '{}': {}\n".format(i, action)
-    user_input = input(action_prompt)
-    if user_input.isdigit() and 0 <= int(user_input) < len(color_choices):
-        selected_color = color_choices[int(user_input)]
-    property_card['active_color'] = selected_color
-    return property_card
+
+    while True:  # Keep prompting until valid input is provided
+        user_input = input(action_prompt)
+        if user_input.isdigit() and 0 <= int(user_input) < len(color_choices):
+            selected_color = color_choices[int(user_input)]
+            property_card['active_color'] = selected_color
+            return property_card
+        else:
+            print("Invalid input. Please enter a valid number.")
 
 
 def place_money(player, money_card):
@@ -151,7 +161,6 @@ def place_money(player, money_card):
     return
 
 
-# Functions for placing a house and a hotel
 def prompt_house_color_choice(player, house_card):
     property_sets = player['property_sets']
     color_choices = []
@@ -165,18 +174,23 @@ def prompt_house_color_choice(player, house_card):
     for card in player['public_hand']:
         if card['card_type'] == 'House':
             color_choices.remove(card['active_color'])
+
     if not color_choices:
         print('No available sets for placing down a house!')
         return house_card
-    else:
-        action_prompt = "What color would you like to assign to the house? \n"
-        for i, action in enumerate(color_choices):
-            action_prompt += "Enter '{}': {}\n".format(i, action)
+
+    action_prompt = "What color would you like to assign to the house? \n"
+    for i, action in enumerate(color_choices):
+        action_prompt += "Enter '{}': {}\n".format(i, action)
+
+    while True:  # Keep prompting until valid input is provided
         user_input = input(action_prompt)
         if user_input.isdigit() and 0 <= int(user_input) < len(color_choices):
             selected_color = color_choices[int(user_input)]
-        house_card['active_color'] = selected_color
-        return house_card
+            house_card['active_color'] = selected_color
+            return house_card
+        else:
+            print("Invalid input. Please enter a valid number.")
 
 
 def place_house(player, house_card):
@@ -199,18 +213,23 @@ def prompt_hotel_color_choice(player, hotel_card):
     for card in player['public_hand']:
         if card['card_type'] == 'Hotel':
             color_choices.remove(card['active_color'])
+
     if not color_choices:
         print('No available sets for placing down a hotel!')
         return hotel_card
-    else:
-        action_prompt = "What color would you like to assign to the hotel? \n"
-        for i, action in enumerate(color_choices):
-            action_prompt += "Enter '{}': {}\n".format(i, action)
+
+    action_prompt = "What color would you like to assign to the hotel? \n"
+    for i, action in enumerate(color_choices):
+        action_prompt += "Enter '{}': {}\n".format(i, action)
+
+    while True:  # Keep prompting until valid input is provided
         user_input = input(action_prompt)
         if user_input.isdigit() and 0 <= int(user_input) < len(color_choices):
             selected_color = color_choices[int(user_input)]
-        hotel_card['active_color'] = selected_color
-        return hotel_card
+            hotel_card['active_color'] = selected_color
+            return hotel_card
+        else:
+            print("Invalid input. Please enter a valid number.")
 
 
 def place_hotel(player, hotel_card):
@@ -224,7 +243,6 @@ def place_hotel(player, hotel_card):
         return
 
 
-# Functions for rent
 def charge_rent(receiver, payers, dollars):
     for payer in payers:
         payment_sum = 0
@@ -232,18 +250,23 @@ def charge_rent(receiver, payers, dollars):
             if not payer['public_hand']:
                 print("{} has no cards left! \n".format(payer['name']))
                 break
-            action_prompt = "You have been charged ${} in rent! You have paid ${} so far." \
-                            "Select which cards you want to pay with.\n".format(dollars, payment_sum)
+            action_prompt = "{}, you have been charged ${} in rent! You have paid ${} so far." \
+                            "Select which cards you want to pay with.\n".format(payer, dollars, payment_sum)
             actions = []
             for card in payer['public_hand']:
                 actions.append(card)
             for i, action in enumerate(actions):
                 action_prompt += "Enter '{}': {}\n".format(i, action)
-            user_input = input(action_prompt)
-            selected_card = actions[int(user_input)]
-            payment_sum += int(selected_card['value'])
-            add_card_to_hand(receiver['public_hand'], selected_card)
-            remove_card_from_hand(payer['public_hand'], selected_card)
+            while True:  # Keep prompting until valid input is provided
+                user_input = input(action_prompt)
+                if user_input.isdigit() and 0 <= int(user_input) < len(actions):
+                    selected_card = actions[int(user_input)]
+                    payment_sum += int(selected_card['value'])
+                    add_card_to_hand(receiver['public_hand'], selected_card)
+                    remove_card_from_hand(payer['public_hand'], selected_card)
+                    break  # Exit the loop once a valid card is selected
+                else:
+                    print("Invalid input. Please enter a valid number.")
     receiver['move_count'] += 1
     return
 
@@ -254,22 +277,28 @@ def prompt_rent_color_choice(player, rent_card):
         if card['active_color'] != 'None':
             if card['active_color'] not in public_hand_colors:
                 public_hand_colors.append(card['active_color'])
+
     color_choices = []
     for color in public_hand_colors:
         if color in rent_card['colors_available']:
             color_choices.append(color)
+
     if not color_choices:
         print("You can't charge rent with this color so it is played as money")
         return rent_card
-    else:
-        action_prompt = "What color would you like to charge rent on? \n"
-        for i, action in enumerate(color_choices):
-            action_prompt += "Enter '{}': {}\n".format(i, action)
+
+    action_prompt = "What color would you like to charge rent on? \n"
+    for i, action in enumerate(color_choices):
+        action_prompt += "Enter '{}': {}\n".format(i, action)
+
+    while True:  # Keep prompting until valid input is provided
         user_input = input(action_prompt)
         if user_input.isdigit() and 0 <= int(user_input) < len(color_choices):
             selected_color = color_choices[int(user_input)]
-        rent_card['active_color'] = selected_color
-        return rent_card
+            rent_card['active_color'] = selected_color
+            return rent_card
+        else:
+            print("Invalid input. Please enter a valid number.")
 
 
 def check_rent(player, rent_card):
@@ -322,21 +351,33 @@ def player_decision(player):
     for i, action in enumerate(actions):
         action_prompt += "Enter '{}': {}\n".format(i, action)
 
-    user_input = input(action_prompt)
-    if user_input.isdigit() and 0 <= int(user_input) < len(actions):
-        selected_action = actions[int(user_input)]
-        return selected_action
-    else:
-        return "Invalid input. Please enter a valid number."
+    while True:  # Keep prompting until valid input is provided
+        user_input = input(action_prompt)
+        if user_input.isdigit() and 0 <= int(user_input) < len(actions):
+            selected_action = actions[int(user_input)]
+            return selected_action
+        else:
+            print("Invalid input. Please enter a valid number.")
 
 
 # Function for setting up a new game
 def game_setup():
     print('Welcome to Monopoly Deal! Complete three property sets to win.\n')
-    number_of_players = int(input("How many players? "))
+
+    # Continuously prompt for the number of players until a valid response is given
+    while True:
+        try:
+            number_of_players = int(input("How many players? Pick between 2 and 5: "))
+            if 2 <= number_of_players <= 5:
+                break  # Exit the loop if a valid number of players is provided
+            else:
+                print("Please enter a number between 2 and 5.")
+        except ValueError:
+            print("Please enter a valid integer.")
+
     players = []  # List to store player objects
     for i in range(1, number_of_players + 1):
-        name = f"Player{i}"
+        name = f"Player {i}"
         player = {
             'name': name,
             'public_hand': [],
