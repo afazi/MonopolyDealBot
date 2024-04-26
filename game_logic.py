@@ -234,8 +234,59 @@ def charge_rent(receiver, payers, dollars):
     receiver['move_count'] += 1
     return
 
+
+def prompt_rent_color_choice(player, rent_card):
+    public_hand_colors = []
+    for card in player['public_hand']:
+        if card['active_color'] != 'None':
+            if card['active_color'] not in public_hand_colors:
+                public_hand_colors.append(card['active_color'])
+    color_choices = public_hand_colors.intersection(rent_card['colors_available'])
+    if not color_choices:
+        print("You can't charge rent with this color so it is played as money")
+        return rent_card
+    else:
+        action_prompt = "What color would you like to charge rent on? \n"
+        for i, action in enumerate(color_choices):
+            action_prompt += "Enter '{}': {}\n".format(i, action)
+        user_input = input(action_prompt)
+        if user_input.isdigit() and 0 <= int(user_input) < len(color_choices):
+            selected_color = color_choices[int(user_input)]
+        rent_card['active_color'] = selected_color
+        return rent_card
+
+
 def check_rent(player, rent_card):
-    pass
+    rent_charge = 0
+    active_color = rent_card['active_color']
+    property_sets = player['property_sets']
+    property_count = property_sets[active_color]
+    for row in card_info.rent_table:
+        if row[0] == active_color:
+            for rent_row in row[1]:
+                if row[0] == property_count:
+                    rent_charge = rent_row[1]
+    # Check for houses
+    for card in player['public_hand']:
+        if card['card_type'] == 'House':
+            if card['active_color'] == active_color:
+                rent_charge += 3
+    # Check for hotels
+    for card in player['public_hand']:
+        if card['card_type'] == 'Hotel':
+            if card['active_color'] == active_color:
+                rent_charge += 4
+    return rent_charge
+
+
+def play_rent_card(player, rent_card, players):
+    rent_card = prompt_rent_color_choice(player, rent_card)
+    if not rent_card['active_color']:
+        place_money(player, rent_card)
+    else:
+        payers = players.remove(player)
+        rent_charge = check_rent(player, rent_card)
+        charge_rent(player, payers, rent_charge)
 
 
 # Function for prompting the player for a decision

@@ -16,18 +16,10 @@ rent_table = [
 ]
 
 card_list = [
-
-    ['Water Works', 'Property', ['Water'], 'Water', 2, 1],
-    ['Electric Company', 'Property', ['Electric'], 'Electric', 2, 1],
-
     ['Wild Property', 'Property', ['Red', 'Yellow', 'Light Blue', 'Black', 'Brown', 'Green', 'Purple', 'Orange',
                                    'Dark Blue', 'Electric', 'Water'], 'None', 0, 2],
-
-
-    ['House', 'House', ['None'], 'None', 3, 3],
-    ['Hotel', 'Hotel', ['None'], 'None', 4, 2],
-
-
+    ['Water Works', 'Property', ['Water'], 'Water', 2, 1],
+    ['Electric Company', 'Property', ['Electric'], 'Electric', 2, 1],
     ['Red & Yellow Wild', 'Property', ['Red', 'Yellow'], 'None', 3, 2],
     ['Indiana Avenue', 'Property', ['Red'], 'Red', 3, 1],
     ['Illinois Avenue', 'Property', ['Red'], 'Red', 3, 1],
@@ -86,6 +78,9 @@ card_list = [
     ['$4', 'Money', ['None'], 'None', 4, 3],
     ['$5', 'Money', ['None'], 'None', 5, 2],
     ['$10', 'Money', ['None'], 'None', 10, 1]
+
+    ['House', 'House', ['None'], 'None', 3, 3],
+    ['Hotel', 'Hotel', ['None'], 'None', 4, 2],
 
 ]
 
