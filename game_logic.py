@@ -339,7 +339,7 @@ def play_rent_card(player, rent_card, players, discard_deck):
         add_card_to_hand(discard_deck, rent_card)
 
 
-# More Action Functions
+# Pass go, birthday, and debt collector action functions
 def pass_go(player, pass_go_card, deck, discard_deck):
     action_prompt = "Would you like to pass go or play this card as money?\n" \
                     "1: Pass go\n" \
@@ -395,6 +395,51 @@ def debt_collector(player, players, debt_collector_card, discard_deck):
             return
         elif user_input == '2':
             place_money(player, debt_collector_card)
+            return
+        else:
+            print("Invalid input. Please enter a valid number.")
+
+
+# Sly deal and forced deal
+def prompt_pick_property_from_hand(player, hand):
+    action_prompt = "Pick a property card from {}'s hand.\n".format(player['name'])
+    property_list = []
+    for i, property_card in enumerate(hand):
+        if property_card['card_type'] == 'Property':
+            action_prompt += "Enter '{}': {}\n".format(i, property_card['name'])
+            property_list.append(property_card)
+    if not property_list:
+        return
+    else:
+        while True:  # Keep prompting until valid input is provided
+            user_input = input(action_prompt)
+            if user_input.isdigit() and 0 <= int(user_input) < len(action_prompt):
+                selected_card = property_list[int(user_input)]
+                return selected_card
+            else:
+                print("Invalid input. Please enter a valid number.")
+
+
+def sly_deal(player, players, sly_deal_card, discard_deck):
+    action_prompt = "Would you like to sly deal or play this card as money?\n" \
+                    "1: Sly deal\n" \
+                    "2: Play this card as money\n"
+    while True:  # Keep prompting until valid input is provided
+        user_input = input(action_prompt)
+        if user_input == '1':
+            other_players = [x for x in players if x != player]
+            selected_player = [prompt_pick_player(player, other_players)][0]
+            hand = selected_player['public_hand']
+
+            selected_card = prompt_pick_property_from_hand(selected_player, hand)
+            remove_card_from_hand(selected_player['public_hand'], selected_card)
+            add_card_to_hand(player['public_hand'], selected_card)
+            remove_card_from_hand(player['private_hand'], sly_deal_card)
+            add_card_to_hand(discard_deck, sly_deal_card)
+            player['move_count'] += 1
+            return
+        elif user_input == '2':
+            place_money(player, sly_deal_card)
             return
         else:
             print("Invalid input. Please enter a valid number.")
@@ -510,6 +555,9 @@ def run_game():
 
                 elif decision['name'] == 'Debt Collector':
                     debt_collector(player, players, decision, discard_deck)
+
+                elif decision['name'] == 'Sly Deal':
+                    sly_deal(player, players, decision, discard_deck)
 
                 else:
                     print("Invalid action:", decision)
