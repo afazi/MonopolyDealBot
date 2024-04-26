@@ -429,9 +429,7 @@ def sly_deal(player, players, sly_deal_card, discard_deck):
         if user_input == '1':
             other_players = [x for x in players if x != player]
             selected_player = [prompt_pick_player(player, other_players)][0]
-            hand = selected_player['public_hand']
-
-            selected_card = prompt_pick_property_from_hand(selected_player, hand)
+            selected_card = prompt_pick_property_from_hand(selected_player, selected_player['public_hand'])
             remove_card_from_hand(selected_player['public_hand'], selected_card)
             add_card_to_hand(player['public_hand'], selected_card)
             remove_card_from_hand(player['private_hand'], sly_deal_card)
@@ -440,6 +438,35 @@ def sly_deal(player, players, sly_deal_card, discard_deck):
             return
         elif user_input == '2':
             place_money(player, sly_deal_card)
+            return
+        else:
+            print("Invalid input. Please enter a valid number.")
+
+
+def forced_deal(player, players, forced_deal_card, discard_deck):
+    action_prompt = "Would you like to force a deal or play this card as money?\n" \
+                    "1: Forced deal\n" \
+                    "2: Play this card as money\n"
+    while True:  # Keep prompting until valid input is provided
+        user_input = input(action_prompt)
+        if user_input == '1':
+            other_players = [x for x in players if x != player]
+            selected_player = [prompt_pick_player(player, other_players)][0]
+            selected_card_receive = prompt_pick_property_from_hand(selected_player, selected_player['public_hand'])
+            selected_card_give = prompt_pick_property_from_hand(player, player['public_hand'])
+
+            remove_card_from_hand(selected_player['public_hand'], selected_card_receive)
+            add_card_to_hand(player['public_hand'], selected_card_receive)
+
+            add_card_to_hand(selected_player['public_hand'], selected_card_give)
+            remove_card_from_hand(player['public_hand'], selected_card_give)
+
+            remove_card_from_hand(player['private_hand'], forced_deal_card)
+            add_card_to_hand(discard_deck, forced_deal_card)
+            player['move_count'] += 1
+            return
+        elif user_input == '2':
+            place_money(player, forced_deal_card)
             return
         else:
             print("Invalid input. Please enter a valid number.")
@@ -558,6 +585,9 @@ def run_game():
 
                 elif decision['name'] == 'Sly Deal':
                     sly_deal(player, players, decision, discard_deck)
+
+                elif decision['name'] == 'Forced Deal':
+                    forced_deal(player, players, decision, discard_deck)
 
                 else:
                     print("Invalid action:", decision)
