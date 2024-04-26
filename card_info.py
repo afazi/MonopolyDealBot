@@ -77,10 +77,10 @@ card_list = [
     ['$3', 'Money', ['None'], 'None', 3, 3],
     ['$4', 'Money', ['None'], 'None', 4, 3],
     ['$5', 'Money', ['None'], 'None', 5, 2],
-    ['$10', 'Money', ['None'], 'None', 10, 1]
+    ['$10', 'Money', ['None'], 'None', 10, 1],
 
     ['House', 'House', ['None'], 'None', 3, 3],
-    ['Hotel', 'Hotel', ['None'], 'None', 4, 2],
+    ['Hotel', 'Hotel', ['None'], 'None', 4, 2]
 
 ]
 
