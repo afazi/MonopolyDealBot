@@ -18,7 +18,7 @@ def create_deck():
 
 
 def shuffle_deck(deck):
-    # random.shuffle(deck)
+    random.shuffle(deck)
     deck.reverse()
     return
 
@@ -70,6 +70,17 @@ def discard_card(player, discard_deck):
         discard_card_helper(selected_card, player, discard_deck)
     else:
         return "Invalid input. Please enter a valid number."
+
+
+# Function to prompt the player to choose another player
+def prompt_pick_player(player, players_list):
+    action_prompt = "{}, pick another player\n.".format(player['name'])
+    for i, player in enumerate(players_list):
+        action_prompt += "Enter '{}': {}\n".format(i, player['name'])
+    user_input = input(action_prompt)
+    if user_input.isdigit() and 0 <= int(user_input) < len(players_list):
+        selected_player = players_list[int(user_input)]
+    return selected_player
 
 
 # Functions for placing properties and money
@@ -133,8 +144,9 @@ def prompt_property_color_choice(player, property_card):
 
 
 def place_money(player, money_card):
-    add_card_to_hand(player['public_hand'], money_card)
     remove_card_from_hand(player['private_hand'], money_card)
+    money_card['card_type'] = 'Money'
+    add_card_to_hand(player['public_hand'], money_card)
     player['move_count'] += 1
     return
 
@@ -218,6 +230,7 @@ def charge_rent(receiver, payers, dollars):
         payment_sum = 0
         while payment_sum < dollars:
             if not payer['public_hand']:
+                print("{} has no cards left! \n".format(payer['name']))
                 break
             action_prompt = "You have been charged ${} in rent! You have paid ${} so far." \
                             "Select which cards you want to pay with.\n".format(dollars, payment_sum)
@@ -241,7 +254,10 @@ def prompt_rent_color_choice(player, rent_card):
         if card['active_color'] != 'None':
             if card['active_color'] not in public_hand_colors:
                 public_hand_colors.append(card['active_color'])
-    color_choices = public_hand_colors.intersection(rent_card['colors_available'])
+    color_choices = []
+    for color in public_hand_colors:
+        if color in rent_card['colors_available']:
+            color_choices.append(color)
     if not color_choices:
         print("You can't charge rent with this color so it is played as money")
         return rent_card
@@ -264,7 +280,7 @@ def check_rent(player, rent_card):
     for row in card_info.rent_table:
         if row[0] == active_color:
             for rent_row in row[1]:
-                if row[0] == property_count:
+                if rent_row[0] == property_count:
                     rent_charge = rent_row[1]
     # Check for houses
     for card in player['public_hand']:
@@ -279,14 +295,19 @@ def check_rent(player, rent_card):
     return rent_charge
 
 
-def play_rent_card(player, rent_card, players):
+def play_rent_card(player, rent_card, players, discard_deck):
     rent_card = prompt_rent_color_choice(player, rent_card)
-    if not rent_card['active_color']:
+    if rent_card['active_color'] == 'None':
         place_money(player, rent_card)
     else:
-        payers = players.remove(player)
+        payers = [x for x in players if x != player]
+        if rent_card['name'] == 'Rent - Wild':
+            payers = [prompt_pick_player(player, payers)]
+
         rent_charge = check_rent(player, rent_card)
         charge_rent(player, payers, rent_charge)
+        remove_card_from_hand(player['private_hand'], rent_card)
+        add_card_to_hand(discard_deck, rent_card)
 
 
 # Function for prompting the player for a decision
@@ -376,9 +397,11 @@ def run_game():
                 elif decision['card_type'] == 'Hotel':
                     place_hotel(player, decision)
 
+                elif decision['card_type'] == 'Rent':
+                    play_rent_card(player, decision, players, discard_deck)
+
                 elif decision['name'] == 'Pass Go':
-                    draw_cards(deck, player, 2)
-                    player['move_count'] += 1
+                    pass
 
                 else:
                     print("Invalid action:", decision)
