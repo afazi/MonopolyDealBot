@@ -10,7 +10,7 @@ def create_card(name, card_type, colors_available, active_color, value):
 
 def create_deck():
     new_deck = []
-    for card_data in card_info.card_list:
+    for card_data in card_info.test_card_list:
         card_data_shortened = card_data[:5]
         for _ in range(card_data[5]):
             new_deck.append(create_card(*card_data_shortened))
@@ -18,7 +18,7 @@ def create_deck():
 
 
 def shuffle_deck(deck):
-    random.shuffle(deck)
+    #random.shuffle(deck)
     deck.reverse()
     return
 
@@ -332,7 +332,10 @@ def play_rent_card(player, rent_card, players, discard_deck):
         payers = [x for x in players if x != player]
         if rent_card['name'] == 'Rent - Wild':
             payers = [prompt_pick_player(player, payers)]
-
+        for payer in payers:
+            if prompt_say_no(player, payer, discard_deck, rent_card):
+                player['move_count'] += 1
+                return
         rent_charge = check_rent(player, rent_card)
         charge_rent(player, payers, rent_charge)
         remove_card_from_hand(player['private_hand'], rent_card)
@@ -367,6 +370,10 @@ def birthday(player, players, birthday_card, discard_deck):
         user_input = input(action_prompt)
         if user_input == '1':
             payers = [x for x in players if x != player]
+            for payer in payers:
+                if prompt_say_no(player, payer, discard_deck, birthday_card):
+                    player['move_count'] += 1
+                    return
             charge_rent(player, payers, 2)
             remove_card_from_hand(player['private_hand'], birthday_card)
             add_card_to_hand(discard_deck, birthday_card)
@@ -388,6 +395,10 @@ def debt_collector(player, players, debt_collector_card, discard_deck):
         if user_input == '1':
             payers = [x for x in players if x != player]
             payers = [prompt_pick_player(player, payers)]
+            for payer in payers:
+                if prompt_say_no(player, payer, discard_deck, debt_collector_card):
+                    player['move_count'] += 1
+                    return
             charge_rent(player, payers, 5)
             remove_card_from_hand(player['private_hand'], debt_collector_card)
             add_card_to_hand(discard_deck, debt_collector_card)
@@ -429,6 +440,9 @@ def sly_deal(player, players, sly_deal_card, discard_deck):
         if user_input == '1':
             other_players = [x for x in players if x != player]
             selected_player = [prompt_pick_player(player, other_players)][0]
+            if prompt_say_no(player, selected_player, discard_deck, sly_deal_card):
+                player['move_count'] += 1
+                return
             selected_card = prompt_pick_property_from_hand(selected_player, selected_player['public_hand'])
             remove_card_from_hand(selected_player['public_hand'], selected_card)
             add_card_to_hand(player['public_hand'], selected_card)
@@ -452,6 +466,9 @@ def forced_deal(player, players, forced_deal_card, discard_deck):
         if user_input == '1':
             other_players = [x for x in players if x != player]
             selected_player = [prompt_pick_player(player, other_players)][0]
+            if prompt_say_no(player, selected_player, discard_deck, forced_deal_card):
+                player['move_count'] += 1
+                return
             selected_card_receive = prompt_pick_property_from_hand(selected_player, selected_player['public_hand'])
             selected_card_give = prompt_pick_property_from_hand(player, player['public_hand'])
 
@@ -470,6 +487,28 @@ def forced_deal(player, players, forced_deal_card, discard_deck):
             return
         else:
             print("Invalid input. Please enter a valid number.")
+
+
+# Just say no function
+def prompt_say_no(action_taker, action_receiver, discard_deck, action_card):
+    for card in action_receiver['private_hand']:
+        if card['name'] == 'Just Say No':
+            action_prompt = "{}, would you like to use your Just Say No card?\n" \
+                            "1: Yes\n" \
+                            "2: No\n".format(action_receiver['name'])
+            while True:  # Keep prompting until valid input is provided
+                user_input = input(action_prompt)
+                if user_input == '1':
+                    print("{} uses a Just Say No card!".format(action_receiver['name']))
+                    remove_card_from_hand(action_receiver['private_hand'], card)
+                    add_card_to_hand(discard_deck, card)
+                    if not prompt_say_no(action_receiver, action_taker, discard_deck, card):
+                        return
+                    remove_card_from_hand(action_taker['private_hand'], action_card)
+                    add_card_to_hand(discard_deck, action_card)
+                    return True
+                else:
+                    return False
 
 
 # Function for prompting the player for a decision
