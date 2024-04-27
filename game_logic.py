@@ -384,13 +384,19 @@ def debt_collector(player, players, debt_collector_card, discard_deck):
 
 
 # Sly deal, forced deal, deal breaker
-def prompt_pick_property_from_hand(player, hand):
+def prompt_pick_property_from_hand(player):
+    hand = player['public_hand']
     action_prompt = "Pick a property card from {}'s hand.\n".format(player['name'])
     property_list = []
+    set_colors_exclude = []
+    for color_index, color_list in player['property_sets'].values():
+        if color_list[0] == color_list[2]:
+            set_colors_exclude.append(color_index)
     for i, property_card in enumerate(hand):
         if property_card['card_type'] == 'Property':
-            action_prompt += "Enter '{}': {}\n".format(i, property_card['name'])
-            property_list.append(property_card)
+            if property_card['active_color'] not in set_colors_exclude:
+                action_prompt += "Enter '{}': {}\n".format(i, property_card['name'])
+                property_list.append(property_card)
     if not property_list:
         return
     else:
@@ -403,12 +409,13 @@ def prompt_pick_property_from_hand(player, hand):
                 print("Invalid input. Please enter a valid number.")
 
 
-def prompt_pick_set_from_hand(player, hand):
+def prompt_pick_set_from_hand(player):
+    hand = player['public_hand']
     action_prompt = "Pick a property set from {}'s hand.\n".format(player['name'])
     set_list = []
     card_list = []
     for color_index, color_list in player['property_sets'].values():
-        if color_list[2] > 0:
+        if color_list[1] > 0:
             set_list.append(color_index)
     if not set_list:
         return
@@ -449,7 +456,7 @@ def sly_deal(player, players, sly_deal_card, discard_deck):
             if prompt_say_no(player, selected_player, discard_deck, sly_deal_card):
                 player['move_count'] += 1
                 return
-            selected_card = prompt_pick_property_from_hand(selected_player, selected_player['public_hand'])
+            selected_card = prompt_pick_property_from_hand(selected_player)
             selected_player['public_hand'].remove(selected_card)
             player['public_hand'].append(selected_card)
             player['private_hand'].remove(sly_deal_card)
@@ -476,8 +483,8 @@ def forced_deal(player, players, forced_deal_card, discard_deck):
             if prompt_say_no(player, selected_player, discard_deck, forced_deal_card):
                 player['move_count'] += 1
                 return
-            selected_card_receive = prompt_pick_property_from_hand(selected_player, selected_player['public_hand'])
-            selected_card_give = prompt_pick_property_from_hand(player, player['public_hand'])
+            selected_card_receive = prompt_pick_property_from_hand(selected_player)
+            selected_card_give = prompt_pick_property_from_hand(player)
 
             selected_player['public_hand'].remove(selected_card_receive)
             player['public_hand'].append(selected_card_receive)
@@ -515,7 +522,7 @@ def deal_breaker(player, players, deal_breaker_card, discard_deck):
             if prompt_say_no(player, selected_player, discard_deck, deal_breaker_card):
                 player['move_count'] += 1
                 return
-            card_set = prompt_pick_set_from_hand(selected_player, selected_player['public_hand'])
+            card_set = prompt_pick_set_from_hand(selected_player)
             for card in card_set:
                 selected_player['public_hand'].remove(card)
                 player['public_hand'].append(card)
