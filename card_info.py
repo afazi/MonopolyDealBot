@@ -85,21 +85,18 @@ card_list = [
 ]
 
 test_card_list = [
+    ['Illinois Avenue', 'Property', ['Red'], 'Red', 3, 3],
     ['House', 'House', ['None'], 'None', 3, 1],
-    ['Wild Property', 'Property', ['Red', 'Yellow', 'Light Blue', 'Black', 'Brown', 'Green', 'Purple', 'Orange',
-                                   'Dark Blue', 'Electric', 'Water'], 'None', 0, 2],
-    ['Illinois Avenue', 'Property', ['Red'], 'Red', 3, 1],
-    ['Kentucky Avenue', 'Property', ['Red'], 'Red', 3, 1],
-    ['Rent - Wild', 'Rent', ['Red', 'Yellow', 'Light Blue', 'Black', 'Brown', 'Green', 'Purple', 'Orange',
-                             'Dark Blue', 'Electric', 'Water'], 'None', 3, 3],
-    ['Red & Yellow Wild', 'Property', ['Red', 'Yellow'], 'None', 3, 2],
-    ['Rent - Red & Yellow', 'Rent', ['Red', 'Yellow'], 'None', 1, 2],
+    ['Hotel', 'Hotel', ['None'], 'None', 4, 1],
 
-    ['Indiana Avenue', 'Property', ['Red'], 'Red', 3, 1],
-    ['Just Say No', 'Action', ['None'], 'None', 4, 1],
+
+    ['Birthday!', 'Action', ['None'], 'None', 2, 2],
+    ['Deal Breaker', 'Action', ['None'], 'None', 5, 2],
+
+
+    ['Just Say No', 'Action', ['None'], 'None', 4, 2],
     ['Sly Deal', 'Action', ['None'], 'None', 3, 3],
     ['Forced Deal', 'Action', ['None'], 'None', 3, 3],
-    ['Birthday!', 'Action', ['None'], 'None', 2, 3],
     ['Debt Collector', 'Action', ['None'], 'None', 3, 3],
 
 
@@ -107,7 +104,6 @@ test_card_list = [
     ['Marvin Gardens', 'Property', ['Yellow'], 'Yellow', 3, 1],
     ['Marvin Gardens', 'Property', ['Yellow'], 'Yellow', 3, 1],
     ['Atlantic Avenue', 'Property', ['Yellow'], 'Yellow', 3, 1],
-    ['Oriental Avenue', 'Property', ['Light Blue'], 'Light Blue', 1, 1],
     ['Vermont Avenue', 'Property', ['Light Blue'], 'Light Blue', 1, 1],
     ['Just Say No', 'Action', ['None'], 'None', 4, 3],
     ['Connecticut Avenue', 'Property', ['Light Blue'], 'Light Blue', 1, 1],
@@ -145,7 +141,6 @@ test_card_list = [
     ['Pass Go', 'Action', ['None'], 'None', 1, 10],
 
 
-    ['Deal Breaker', 'Action', ['None'], 'None', 5, 2],
     ['Double the Rent', 'Action', ['None'], 'None', 1, 2],
 
     ['$1', 'Money', ['None'], 'None', 1, 6],
@@ -156,7 +151,6 @@ test_card_list = [
     ['$10', 'Money', ['None'], 'None', 10, 1],
 
 
-    ['Hotel', 'Hotel', ['None'], 'None', 4, 2],
     ['Water Works', 'Property', ['Water'], 'Water', 2, 1],
     ['Electric Company', 'Property', ['Electric'], 'Electric', 2, 1]
 

@@ -307,6 +307,8 @@ def play_rent_card(player, rent_card, players, discard_deck):
         for payer in payers:
             if prompt_say_no(player, payer, discard_deck, rent_card):
                 player['move_count'] += 1
+                player['private_hand'].remove(rent_card)
+                discard_deck.append(rent_card)
                 return
         rent_charge = check_rent(player, rent_card)
         charge_rent(player, payers, rent_charge)
@@ -345,6 +347,8 @@ def birthday(player, players, birthday_card, discard_deck):
             for payer in payers:
                 if prompt_say_no(player, payer, discard_deck, birthday_card):
                     player['move_count'] += 1
+                    player['private_hand'].remove(birthday_card)
+                    discard_deck.append(birthday_card)
                     return
             charge_rent(player, payers, 2)
             player['private_hand'].remove(birthday_card)
@@ -370,6 +374,8 @@ def debt_collector(player, players, debt_collector_card, discard_deck):
             for payer in payers:
                 if prompt_say_no(player, payer, discard_deck, debt_collector_card):
                     player['move_count'] += 1
+                    player['private_hand'].remove(debt_collector_card)
+                    discard_deck.append(debt_collector_card)
                     return
             charge_rent(player, payers, 5)
             player['private_hand'].remove(debt_collector_card)
@@ -389,7 +395,7 @@ def prompt_pick_property_from_hand(player):
     action_prompt = "Pick a property card from {}'s hand.\n".format(player['name'])
     property_list = []
     set_colors_exclude = []
-    for color_index, color_list in player['property_sets'].values():
+    for color_index, color_list in player['property_sets'].items():
         if color_list[0] == color_list[2]:
             set_colors_exclude.append(color_index)
     for i, property_card in enumerate(hand):
@@ -414,15 +420,18 @@ def prompt_pick_set_from_hand(player):
     action_prompt = "Pick a property set from {}'s hand.\n".format(player['name'])
     set_list = []
     card_list = []
-    for color_index, color_list in player['property_sets'].values():
+    for color_index, color_list in player['property_sets'].items():
         if color_list[1] > 0:
             set_list.append(color_index)
     if not set_list:
         return
+    for i, property_card in enumerate(set_list):
+        action_prompt += "Enter '{}': {}\n".format(i, set_list)
+
     else:
         while True:  # Keep prompting until valid input is provided
             user_input = input(action_prompt)
-            if user_input.isdigit() and 0 <= int(user_input) < len(action_prompt):
+            if user_input.isdigit() and 0 <= int(user_input) < len(set_list):
                 selected_set_color = set_list[int(user_input)]
                 remaining_properties_to_take = player['property_sets'][selected_set_color][1]
                 while remaining_properties_to_take > 0:
@@ -455,6 +464,8 @@ def sly_deal(player, players, sly_deal_card, discard_deck):
             selected_player = [prompt_pick_player(player, other_players)][0]
             if prompt_say_no(player, selected_player, discard_deck, sly_deal_card):
                 player['move_count'] += 1
+                player['private_hand'].remove(sly_deal_card)
+                discard_deck.append(sly_deal_card)
                 return
             selected_card = prompt_pick_property_from_hand(selected_player)
             selected_player['public_hand'].remove(selected_card)
@@ -482,6 +493,8 @@ def forced_deal(player, players, forced_deal_card, discard_deck):
             selected_player = [prompt_pick_player(player, other_players)][0]
             if prompt_say_no(player, selected_player, discard_deck, forced_deal_card):
                 player['move_count'] += 1
+                player['private_hand'].remove(forced_deal_card)
+                discard_deck.append(forced_deal_card)
                 return
             selected_card_receive = prompt_pick_property_from_hand(selected_player)
             selected_card_give = prompt_pick_property_from_hand(player)
@@ -514,19 +527,24 @@ def deal_breaker(player, players, deal_breaker_card, discard_deck):
             other_players = [x for x in players if x != player]
             other_players_with_sets = []
             for other_player in other_players:
-                for color_set in other_player['property sets'].values():
+                for color_set in other_player['property_sets'].values():
                     if color_set[1] > 0:
                         other_players_with_sets.append(other_player)
                         break
             selected_player = [prompt_pick_player(player, other_players_with_sets)][0]
             if prompt_say_no(player, selected_player, discard_deck, deal_breaker_card):
+                player['private_hand'].remove(deal_breaker_card)
+                discard_deck.append(deal_breaker_card)
                 player['move_count'] += 1
                 return
             card_set = prompt_pick_set_from_hand(selected_player)
             for card in card_set:
                 selected_player['public_hand'].remove(card)
                 player['public_hand'].append(card)
-                return
+            player['private_hand'].remove(deal_breaker_card)
+            discard_deck.append(deal_breaker_card)
+            player['move_count'] += 1
+            return
         elif user_input == '2':
             place_money(player, deal_breaker_card)
             return
@@ -547,10 +565,8 @@ def prompt_say_no(action_taker, action_receiver, discard_deck, action_card):
                     print("{} uses a Just Say No card!".format(action_receiver['name']))
                     action_receiver['private_hand'].remove(card)
                     discard_deck.append(card)
-                    if not prompt_say_no(action_receiver, action_taker, discard_deck, card):
-                        return
-                    action_taker['private_hand'].remove(action_card)
-                    discard_deck.append(action_card)
+                    if prompt_say_no(action_receiver, action_taker, discard_deck, card):
+                        return False
                     return True
                 else:
                     return False
@@ -686,6 +702,9 @@ def run_game():
 
                 elif decision['name'] == 'Forced Deal':
                     forced_deal(player, players, decision, discard_deck)
+
+                elif decision['name'] == 'Deal Breaker':
+                    deal_breaker(player, players, decision, discard_deck)
 
                 else:
                     print("Invalid action:", decision)
