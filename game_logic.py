@@ -94,27 +94,21 @@ def get_color_max(color):
     return len(color_entry[1]) if color_entry else 0
 
 
-def update_property_count(player, new_card):
-    property_sets = player['property_sets']
-    new_card_color = new_card['active_color']
-    if new_card_color in property_sets:
-        property_sets[new_card_color] += 1
-    else:
-        property_sets[new_card_color] = 1
-
-
-def check_properties_count(player):
-    property_sets = player['property_sets']
-    completed_sets = 0
-    for color, count in property_sets.items():
-        max_properties = get_color_max(color)
-        completed_of_a_color = count // max_properties
-        completed_sets += completed_of_a_color
-
-    if completed_sets >= 3:
-        print(f'Congratulations! {player} has won the game!')
-    else:
-        return
+# add this to sly deal, and all other action cards
+def update_property_count(players):
+    for player in players:
+        completed_sets = 0
+        player_property_sets = player['property_sets']
+        player_public_hand = player['public_hand']
+        for card in player_public_hand:
+            if card['card_type'] == 'Property':
+                player_property_sets[card['active_color']][0] += 1
+        for value in player_property_sets.values():
+            value[1] = value[0] // value[2]
+            completed_sets += value[1]
+        if completed_sets >= 3:
+            print(f'Congratulations! {player} has won the game!')
+    return
 
 
 def place_property(player, property_card):
@@ -123,8 +117,6 @@ def place_property(player, property_card):
     add_card_to_hand(player['public_hand'], property_card)
     remove_card_from_hand(player['private_hand'], property_card)
     player['move_count'] += 1
-    update_property_count(player, property_card)
-    check_properties_count(player)
     return
 
 
@@ -411,7 +403,7 @@ def debt_collector(player, players, debt_collector_card, discard_deck):
             print("Invalid input. Please enter a valid number.")
 
 
-# Sly deal and forced deal
+# Sly deal, forced deal, deal breaker
 def prompt_pick_property_from_hand(player, hand):
     action_prompt = "Pick a property card from {}'s hand.\n".format(player['name'])
     property_list = []
@@ -430,7 +422,31 @@ def prompt_pick_property_from_hand(player, hand):
             else:
                 print("Invalid input. Please enter a valid number.")
 
+"""
+def prompt_pick_set_from_hand(player, hand):
+    action_prompt = "Pick a property set from {}'s hand.\n".format(player['name'])
+    property_list = []
+    for property_card in hand:
+        if property_card['card_type'] == 'Property':
+            property_list.append(property_card['active_color'])
+    property_list = list(set(property_list))
+    for color in property_list:
 
+            
+            
+    if not property_list:
+        return
+    else:
+        while True:  # Keep prompting until valid input is provided
+            user_input = input(action_prompt)
+            if user_input.isdigit() and 0 <= int(user_input) < len(action_prompt):
+                selected_card = property_list[int(user_input)]
+                return selected_card
+            else:
+                print("Invalid input. Please enter a valid number.")
+
+"""
+# Amend so you can't steal properties that are part of sets
 def sly_deal(player, players, sly_deal_card, discard_deck):
     action_prompt = "Would you like to sly deal or play this card as money?\n" \
                     "1: Sly deal\n" \
@@ -456,7 +472,7 @@ def sly_deal(player, players, sly_deal_card, discard_deck):
         else:
             print("Invalid input. Please enter a valid number.")
 
-
+# Amend so you can't steal properties that are part of sets
 def forced_deal(player, players, forced_deal_card, discard_deck):
     action_prompt = "Would you like to force a deal or play this card as money?\n" \
                     "1: Forced deal\n" \
@@ -487,6 +503,34 @@ def forced_deal(player, players, forced_deal_card, discard_deck):
             return
         else:
             print("Invalid input. Please enter a valid number.")
+
+"""
+def deal_breaker(player, players, deal_breaker_card, discard_deck):
+    action_prompt = "Would you like to steal a set or play this as money?\n" \
+                    "1: Steal a set\n" \
+                    "2: Play this card as money\n"
+    while True:  # Keep prompting until valid input is provided
+        user_input = input(action_prompt)
+        if user_input == '1':
+            other_players = [x for x in players if x != player]
+            other_players = [x for x in other_players if x['property_sets'] > 0]
+            selected_player = [prompt_pick_player(player, other_players)][0]
+            if prompt_say_no(player, selected_player, discard_deck, deal_breaker_card):
+                player['move_count'] += 1
+                return
+            
+
+
+
+
+        elif user_input == '2':
+            place_money(player, forced_deal_card)
+            return
+    else:
+        print("Invalid input. Please enter a valid number.")
+
+
+"""
 
 
 # Just say no function
@@ -555,7 +599,20 @@ def game_setup():
             'public_hand': [],
             'private_hand': [],
             'move_count': 0,
-            'property_sets': {}
+            # Property sets structured as color: [properties, sets, set_requirement]
+            'property_sets': {
+                'Red': [0, 0, 3],
+                'Yellow': [0, 0, 3],
+                'Light Blue': [0, 0, 3],
+                'Black': [0, 0, 4],
+                'Brown': [0, 0, 1],
+                'Green': [0, 0, 3],
+                'Purple': [0, 0, 3],
+                'Orange': [0, 0, 3],
+                'Dark Blue': [0, 0, 2],
+                'Electric': [0, 0, 2],
+                'Water': [0, 0, 2]
+            }
         }
         players.append(player)
 
@@ -581,6 +638,7 @@ def run_game():
             player['move_count'] = 0
 
             while True:
+                update_property_count(players)
                 if player['move_count'] == 3:
                     break
                 else:
