@@ -20,13 +20,12 @@ def create_deck():
 def shuffle_deck(deck):
     #random.shuffle(deck)
     deck.reverse()
-    return
 
 
 def reset_deck(deck, discard_deck):
     deck.extend(discard_deck)
     shuffle_deck(deck)
-    return
+    discard_deck.clear()
 
 
 # Functions for moving cards
@@ -35,29 +34,18 @@ def draw_cards(deck, player, cards_number):
         player['private_hand'].append(deck.pop())
 
 
-def add_card_to_hand(hand, card):
-    hand.append(card)
-    return
-
-
-def remove_card_from_hand(hand, card):
-    hand.remove(card)
-    return
-
-
 def display_public_cards(players):
     for player in players:
         print(f"{player['name']}'s public hand:")
         for card in player['public_hand']:
             print(card['name'] + ' ' + card['active_color'])
         print("\n")
-    return
 
 
 def discard_card(player, discard_deck):
     def discard_card_helper(card, player, discard_deck):
         discard_deck.append(card)
-        remove_card_from_hand(player['private_hand'], card)
+        player['private_hand'].remove(card)
 
     action_prompt = "Which card would you like to discard? \n"
 
@@ -88,18 +76,14 @@ def prompt_pick_player(player, players_list):
             print("Invalid input. Please enter a valid number.")
 
 
-# Functions for placing properties and money
-def get_color_max(color):
-    color_entry = next((entry for entry in card_info.rent_table if entry[0] == color), None)
-    return len(color_entry[1]) if color_entry else 0
-
-
-# add this to sly deal, and all other action cards
 def update_property_count(players):
     for player in players:
         completed_sets = 0
         player_property_sets = player['property_sets']
         player_public_hand = player['public_hand']
+        for value in player_property_sets.values():
+            value[0] = 0
+            value[1] = 0
         for card in player_public_hand:
             if card['card_type'] == 'Property':
                 player_property_sets[card['active_color']][0] += 1
@@ -114,8 +98,8 @@ def update_property_count(players):
 def place_property(player, property_card):
     if len(property_card['colors_available']) > 1:
         property_card = prompt_property_color_choice(player, property_card)
-    add_card_to_hand(player['public_hand'], property_card)
-    remove_card_from_hand(player['private_hand'], property_card)
+    player['public_hand'].append(property_card)
+    player['private_hand'].remove(property_card)
     player['move_count'] += 1
     return
 
@@ -146,9 +130,9 @@ def prompt_property_color_choice(player, property_card):
 
 
 def place_money(player, money_card):
-    remove_card_from_hand(player['private_hand'], money_card)
+    player['private_hand'].remove(money_card)
     money_card['card_type'] = 'Money'
-    add_card_to_hand(player['public_hand'], money_card)
+    player['public_hand'].append(money_card)
     player['move_count'] += 1
     return
 
@@ -159,8 +143,7 @@ def prompt_house_color_choice(player, house_card):
     for card in player['public_hand']:
         active_color = card['active_color']
         if active_color not in ['None', 'black', 'Electric', 'Water']:
-            max_properties = get_color_max(active_color)
-            if property_sets.get(active_color, 0) >= max_properties:
+            if property_sets[active_color][1] >= 1:
                 if active_color not in color_choices:
                     color_choices.append(active_color)
     for card in player['public_hand']:
@@ -168,7 +151,7 @@ def prompt_house_color_choice(player, house_card):
             color_choices.remove(card['active_color'])
 
     if not color_choices:
-        print('No available sets for placing down a house!')
+        print('No available sets for placing down a house. It is played as money')
         return house_card
 
     action_prompt = "What color would you like to assign to the house? \n"
@@ -187,13 +170,10 @@ def prompt_house_color_choice(player, house_card):
 
 def place_house(player, house_card):
     house_card = prompt_house_color_choice(player, house_card)
-    if house_card['active_color'] == ['None']:
-        return
-    else:
-        add_card_to_hand(player['public_hand'], house_card)
-        remove_card_from_hand(player['private_hand'], house_card)
-        player['move_count'] += 1
-        return
+    player['public_hand'].append(house_card)
+    player['private_hand'].remove(house_card)
+    player['move_count'] += 1
+    return
 
 
 def prompt_hotel_color_choice(player, hotel_card):
@@ -229,8 +209,8 @@ def place_hotel(player, hotel_card):
     if hotel_card['active_color'] == ['None']:
         return
     else:
-        add_card_to_hand(player['public_hand'], hotel_card)
-        remove_card_from_hand(player['private_hand'], hotel_card)
+        player['public_hand'].append(hotel_card)
+        player['private_hand'].remove(hotel_card)
         player['move_count'] += 1
         return
 
@@ -243,7 +223,7 @@ def charge_rent(receiver, payers, dollars):
                 print("{} has no cards left! \n".format(payer['name']))
                 break
             action_prompt = "{}, you have been charged ${} in rent! You have paid ${} so far." \
-                            "Select which cards you want to pay with.\n".format(payer, dollars, payment_sum)
+                            "Select which cards you want to pay with.\n".format(payer['name'], dollars, payment_sum)
             actions = []
             for card in payer['public_hand']:
                 actions.append(card)
@@ -254,8 +234,8 @@ def charge_rent(receiver, payers, dollars):
                 if user_input.isdigit() and 0 <= int(user_input) < len(actions):
                     selected_card = actions[int(user_input)]
                     payment_sum += int(selected_card['value'])
-                    add_card_to_hand(receiver['public_hand'], selected_card)
-                    remove_card_from_hand(payer['public_hand'], selected_card)
+                    receiver['public_hand'].append(selected_card)
+                    payer['public_hand'].remove(selected_card)
                     break  # Exit the loop once a valid card is selected
                 else:
                     print("Invalid input. Please enter a valid number.")
@@ -297,7 +277,7 @@ def check_rent(player, rent_card):
     rent_charge = 0
     active_color = rent_card['active_color']
     property_sets = player['property_sets']
-    property_count = property_sets[active_color]
+    property_count = property_sets[active_color][0]
     for row in card_info.rent_table:
         if row[0] == active_color:
             for rent_row in row[1]:
@@ -330,8 +310,8 @@ def play_rent_card(player, rent_card, players, discard_deck):
                 return
         rent_charge = check_rent(player, rent_card)
         charge_rent(player, payers, rent_charge)
-        remove_card_from_hand(player['private_hand'], rent_card)
-        add_card_to_hand(discard_deck, rent_card)
+        player['private_hand'].remove(rent_card)
+        discard_deck.append(rent_card)
 
 
 # Pass go, birthday, and debt collector action functions
@@ -343,8 +323,8 @@ def pass_go(player, pass_go_card, deck, discard_deck):
         user_input = input(action_prompt)
         if user_input == '1':
             draw_cards(deck, player, 2)
-            remove_card_from_hand(player['private_hand'], pass_go_card)
-            add_card_to_hand(discard_deck, pass_go_card)
+            player['private_hand'].remove(pass_go_card)
+            discard_deck.append(pass_go_card)
             player['move_count'] += 1
             return
         elif user_input == '2':
@@ -367,8 +347,8 @@ def birthday(player, players, birthday_card, discard_deck):
                     player['move_count'] += 1
                     return
             charge_rent(player, payers, 2)
-            remove_card_from_hand(player['private_hand'], birthday_card)
-            add_card_to_hand(discard_deck, birthday_card)
+            player['private_hand'].remove(birthday_card)
+            discard_deck.append(birthday_card)
             player['move_count'] += 1
             return
         elif user_input == '2':
@@ -392,8 +372,8 @@ def debt_collector(player, players, debt_collector_card, discard_deck):
                     player['move_count'] += 1
                     return
             charge_rent(player, payers, 5)
-            remove_card_from_hand(player['private_hand'], debt_collector_card)
-            add_card_to_hand(discard_deck, debt_collector_card)
+            player['private_hand'].remove(debt_collector_card)
+            discard_deck.append(debt_collector_card)
             player['move_count'] += 1
             return
         elif user_input == '2':
@@ -422,30 +402,40 @@ def prompt_pick_property_from_hand(player, hand):
             else:
                 print("Invalid input. Please enter a valid number.")
 
-"""
+
 def prompt_pick_set_from_hand(player, hand):
     action_prompt = "Pick a property set from {}'s hand.\n".format(player['name'])
-    property_list = []
-    for property_card in hand:
-        if property_card['card_type'] == 'Property':
-            property_list.append(property_card['active_color'])
-    property_list = list(set(property_list))
-    for color in property_list:
-
-            
-            
-    if not property_list:
+    set_list = []
+    card_list = []
+    for color_index, color_list in player['property_sets'].values():
+        if color_list[2] > 0:
+            set_list.append(color_index)
+    if not set_list:
         return
     else:
         while True:  # Keep prompting until valid input is provided
             user_input = input(action_prompt)
             if user_input.isdigit() and 0 <= int(user_input) < len(action_prompt):
-                selected_card = property_list[int(user_input)]
-                return selected_card
+                selected_set_color = set_list[int(user_input)]
+                remaining_properties_to_take = player['property_sets'][selected_set_color][1]
+                while remaining_properties_to_take > 0:
+                    for card in hand:
+                        if card['card_type'] == 'Property' and card['active_color'] == selected_set_color:
+                            card_list.append(card)
+                            remaining_properties_to_take -= 1
+                for card in hand:
+                    if card['card_type'] == 'House' and card['active_color'] == selected_set_color:
+                        card_list.append(card)
+                        break
+                for card in hand:
+                    if card['card_type'] == 'Hotel' and card['active_color'] == selected_set_color:
+                        card_list.append(card)
+                        break
+                return card_list
             else:
                 print("Invalid input. Please enter a valid number.")
 
-"""
+
 # Amend so you can't steal properties that are part of sets
 def sly_deal(player, players, sly_deal_card, discard_deck):
     action_prompt = "Would you like to sly deal or play this card as money?\n" \
@@ -460,10 +450,10 @@ def sly_deal(player, players, sly_deal_card, discard_deck):
                 player['move_count'] += 1
                 return
             selected_card = prompt_pick_property_from_hand(selected_player, selected_player['public_hand'])
-            remove_card_from_hand(selected_player['public_hand'], selected_card)
-            add_card_to_hand(player['public_hand'], selected_card)
-            remove_card_from_hand(player['private_hand'], sly_deal_card)
-            add_card_to_hand(discard_deck, sly_deal_card)
+            selected_player['public_hand'].remove(selected_card)
+            player['public_hand'].append(selected_card)
+            player['private_hand'].remove(sly_deal_card)
+            discard_deck.append(sly_deal_card)
             player['move_count'] += 1
             return
         elif user_input == '2':
@@ -471,6 +461,7 @@ def sly_deal(player, players, sly_deal_card, discard_deck):
             return
         else:
             print("Invalid input. Please enter a valid number.")
+
 
 # Amend so you can't steal properties that are part of sets
 def forced_deal(player, players, forced_deal_card, discard_deck):
@@ -488,14 +479,15 @@ def forced_deal(player, players, forced_deal_card, discard_deck):
             selected_card_receive = prompt_pick_property_from_hand(selected_player, selected_player['public_hand'])
             selected_card_give = prompt_pick_property_from_hand(player, player['public_hand'])
 
-            remove_card_from_hand(selected_player['public_hand'], selected_card_receive)
-            add_card_to_hand(player['public_hand'], selected_card_receive)
+            selected_player['public_hand'].remove(selected_card_receive)
+            player['public_hand'].append(selected_card_receive)
 
-            add_card_to_hand(selected_player['public_hand'], selected_card_give)
-            remove_card_from_hand(player['public_hand'], selected_card_give)
+            selected_player['public_hand'].append(selected_card_give)
+            player['public_hand'].remove(selected_card_give)
 
-            remove_card_from_hand(player['private_hand'], forced_deal_card)
-            add_card_to_hand(discard_deck, forced_deal_card)
+            player['private_hand'].remove(forced_deal_card)
+            discard_deck.append(forced_deal_card)
+
             player['move_count'] += 1
             return
         elif user_input == '2':
@@ -504,7 +496,7 @@ def forced_deal(player, players, forced_deal_card, discard_deck):
         else:
             print("Invalid input. Please enter a valid number.")
 
-"""
+
 def deal_breaker(player, players, deal_breaker_card, discard_deck):
     action_prompt = "Would you like to steal a set or play this as money?\n" \
                     "1: Steal a set\n" \
@@ -513,24 +505,26 @@ def deal_breaker(player, players, deal_breaker_card, discard_deck):
         user_input = input(action_prompt)
         if user_input == '1':
             other_players = [x for x in players if x != player]
-            other_players = [x for x in other_players if x['property_sets'] > 0]
-            selected_player = [prompt_pick_player(player, other_players)][0]
+            other_players_with_sets = []
+            for other_player in other_players:
+                for color_set in other_player['property sets'].values():
+                    if color_set[1] > 0:
+                        other_players_with_sets.append(other_player)
+                        break
+            selected_player = [prompt_pick_player(player, other_players_with_sets)][0]
             if prompt_say_no(player, selected_player, discard_deck, deal_breaker_card):
                 player['move_count'] += 1
                 return
-            
-
-
-
-
+            card_set = prompt_pick_set_from_hand(selected_player, selected_player['public_hand'])
+            for card in card_set:
+                selected_player['public_hand'].remove(card)
+                player['public_hand'].append(card)
+                return
         elif user_input == '2':
-            place_money(player, forced_deal_card)
+            place_money(player, deal_breaker_card)
             return
     else:
         print("Invalid input. Please enter a valid number.")
-
-
-"""
 
 
 # Just say no function
@@ -544,12 +538,12 @@ def prompt_say_no(action_taker, action_receiver, discard_deck, action_card):
                 user_input = input(action_prompt)
                 if user_input == '1':
                     print("{} uses a Just Say No card!".format(action_receiver['name']))
-                    remove_card_from_hand(action_receiver['private_hand'], card)
-                    add_card_to_hand(discard_deck, card)
+                    action_receiver['private_hand'].remove(card)
+                    discard_deck.append(card)
                     if not prompt_say_no(action_receiver, action_taker, discard_deck, card):
                         return
-                    remove_card_from_hand(action_taker['private_hand'], action_card)
-                    add_card_to_hand(discard_deck, action_card)
+                    action_taker['private_hand'].remove(action_card)
+                    discard_deck.append(action_card)
                     return True
                 else:
                     return False

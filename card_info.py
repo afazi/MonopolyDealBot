@@ -85,10 +85,11 @@ card_list = [
 ]
 
 test_card_list = [
-    ['Just Say No', 'Action', ['None'], 'None', 4, 1],
+    ['House', 'House', ['None'], 'None', 3, 1],
     ['Wild Property', 'Property', ['Red', 'Yellow', 'Light Blue', 'Black', 'Brown', 'Green', 'Purple', 'Orange',
                                    'Dark Blue', 'Electric', 'Water'], 'None', 0, 2],
-
+    ['Illinois Avenue', 'Property', ['Red'], 'Red', 3, 1],
+    ['Kentucky Avenue', 'Property', ['Red'], 'Red', 3, 1],
     ['Rent - Wild', 'Rent', ['Red', 'Yellow', 'Light Blue', 'Black', 'Brown', 'Green', 'Purple', 'Orange',
                              'Dark Blue', 'Electric', 'Water'], 'None', 3, 3],
     ['Red & Yellow Wild', 'Property', ['Red', 'Yellow'], 'None', 3, 2],
@@ -101,8 +102,7 @@ test_card_list = [
     ['Birthday!', 'Action', ['None'], 'None', 2, 3],
     ['Debt Collector', 'Action', ['None'], 'None', 3, 3],
 
-    ['Illinois Avenue', 'Property', ['Red'], 'Red', 3, 1],
-    ['Kentucky Avenue', 'Property', ['Red'], 'Red', 3, 1],
+
 
     ['Marvin Gardens', 'Property', ['Yellow'], 'Yellow', 3, 1],
     ['Marvin Gardens', 'Property', ['Yellow'], 'Yellow', 3, 1],
@@ -155,7 +155,7 @@ test_card_list = [
     ['$5', 'Money', ['None'], 'None', 5, 2],
     ['$10', 'Money', ['None'], 'None', 10, 1],
 
-    ['House', 'House', ['None'], 'None', 3, 3],
+
     ['Hotel', 'Hotel', ['None'], 'None', 4, 2],
     ['Water Works', 'Property', ['Water'], 'Water', 2, 1],
     ['Electric Company', 'Property', ['Electric'], 'Electric', 2, 1]
