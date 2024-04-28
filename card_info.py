@@ -86,6 +86,8 @@ card_list = [
 
 test_card_list = [
     ['Illinois Avenue', 'Property', ['Red'], 'Red', 3, 3],
+    ['Rent - Red & Yellow', 'Rent', ['Red', 'Yellow'], 'None', 1, 1],
+    ['Double the Rent', 'Action', ['None'], 'None', 1, 1],
     ['House', 'House', ['None'], 'None', 3, 1],
     ['Hotel', 'Hotel', ['None'], 'None', 4, 1],
 
@@ -141,7 +143,7 @@ test_card_list = [
     ['Pass Go', 'Action', ['None'], 'None', 1, 10],
 
 
-    ['Double the Rent', 'Action', ['None'], 'None', 1, 2],
+
 
     ['$1', 'Money', ['None'], 'None', 1, 6],
     ['$2', 'Money', ['None'], 'None', 2, 5],

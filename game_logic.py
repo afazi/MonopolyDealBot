@@ -304,6 +304,7 @@ def play_rent_card(player, rent_card, players, discard_deck):
         payers = [x for x in players if x != player]
         if rent_card['name'] == 'Rent - Wild':
             payers = [prompt_pick_player(player, payers)]
+        double_rent_answer = prompt_double_rent(player, discard_deck)
         for payer in payers:
             if prompt_say_no(player, payer, discard_deck, rent_card):
                 player['move_count'] += 1
@@ -311,9 +312,32 @@ def play_rent_card(player, rent_card, players, discard_deck):
                 discard_deck.append(rent_card)
                 return
         rent_charge = check_rent(player, rent_card)
-        charge_rent(player, payers, rent_charge)
+        if double_rent_answer:
+            double_rent_charge = rent_charge * 2
+            charge_rent(player, payers, double_rent_charge)
+        else:
+            charge_rent(player, payers, rent_charge)
         player['private_hand'].remove(rent_card)
         discard_deck.append(rent_card)
+        player['move_count'] += 1
+
+
+def prompt_double_rent(player, discard_deck):
+    for card in player['private_hand']:
+        if card['name'] == 'Double the Rent':
+            if player['move_count'] < 2:
+                user_input = input('Would you like to use your Double The Rent Card on top of this rent?\n'
+                                   '1: Yes \n'
+                                   '2: No \n')
+                if user_input == 1:
+                    player['private_hand'].remove(card)
+                    discard_deck.append(card)
+                    player['move_count'] += 1
+                    return True
+                else:
+                    return False
+
+
 
 
 # Pass go, birthday, and debt collector action functions
