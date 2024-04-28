@@ -596,15 +596,35 @@ def prompt_say_no(action_taker, action_receiver, discard_deck, action_card):
                     return False
 
 
+# Function to switch a publicly played, 2-sided wild card
+def switch_wild_card(player):
+    wild_cards = []
+    for card in player['public_hand']:
+        if len(card['colors_available']) == 2:
+            wild_cards.append(card)
+    action_prompt = "Which wild card would you like to flip?.\n"
+    for i, action in enumerate(wild_cards):
+        action_prompt += "Enter '{}': {}\n".format(i, action)
+    while True:  # Keep prompting until valid input is provided
+        user_input = input(action_prompt)
+        if user_input.isdigit() and 0 <= int(user_input) < len(wild_cards):
+            selected_wild_card = wild_cards[int(user_input)]
+            selected_wild_card['active_color'] = next(color for color in selected_wild_card['colors_available'] if
+                                                      color != selected_wild_card['active_color'])
+            player['move_count'] += 1
+            return
+
+
 # Function for prompting the player for a decision
 def player_decision(player):
     actions = ['End Turn', 'Discard Card']
+    for card in player['public_hand']:
+        if len(card['colors_available']) == 2:
+            actions.append('Switch a wild card')
     for card in player['private_hand']:
         actions.append(card)
-
     action_prompt = "What would you like to do {}? You've taken {} moves.\n".format(player['name'],
                                                                                     player['move_count'])
-
     for i, action in enumerate(actions):
         action_prompt += "Enter '{}': {}\n".format(i, action)
 
@@ -696,6 +716,9 @@ def run_game():
 
                 elif decision == 'Discard Card':
                     discard_card(player, discard_deck)
+
+                elif decision == 'Switch a wild card':
+                    switch_wild_card(player)
 
                 elif decision['card_type'] == 'Property':
                     place_property(player, decision)
