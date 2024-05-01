@@ -8,9 +8,9 @@ def create_card(name, card_type, colors_available, active_color, value):
             'value': value}
 
 
-def create_deck():
+def create_deck(card_list):
     new_deck = []
-    for card_data in card_info.test_card_list:
+    for card_data in card_list:
         card_data_shortened = card_data[:5]
         for _ in range(card_data[5]):
             new_deck.append(create_card(*card_data_shortened))
@@ -18,7 +18,7 @@ def create_deck():
 
 
 def shuffle_deck(deck):
-    #random.shuffle(deck)
+    random.shuffle(deck)
     deck.reverse()
 
 
@@ -239,7 +239,6 @@ def charge_rent(receiver, payers, dollars):
                     break  # Exit the loop once a valid card is selected
                 else:
                     print("Invalid input. Please enter a valid number.")
-    receiver['move_count'] += 1
     return
 
 
@@ -338,8 +337,6 @@ def prompt_double_rent(player, discard_deck):
                     return False
 
 
-
-
 # Pass go, birthday, and debt collector action functions
 def pass_go(player, pass_go_card, deck, discard_deck):
     action_prompt = "Would you like to pass go or play this card as money?\n" \
@@ -422,11 +419,12 @@ def prompt_pick_property_from_hand(player):
     for color_index, color_list in player['property_sets'].items():
         if color_list[0] == color_list[2]:
             set_colors_exclude.append(color_index)
-    for i, property_card in enumerate(hand):
+    for property_card in hand:
         if property_card['card_type'] == 'Property':
             if property_card['active_color'] not in set_colors_exclude:
-                action_prompt += "Enter '{}': {}\n".format(i, property_card['name'])
                 property_list.append(property_card)
+    for i, property_card in enumerate(property_list):
+        action_prompt += "Enter '{}': {}\n".format(i, property_card['name'])
     if not property_list:
         return
     else:
@@ -520,8 +518,8 @@ def forced_deal(player, players, forced_deal_card, discard_deck):
                 player['private_hand'].remove(forced_deal_card)
                 discard_deck.append(forced_deal_card)
                 return
-            selected_card_receive = prompt_pick_property_from_hand(selected_player)
             selected_card_give = prompt_pick_property_from_hand(player)
+            selected_card_receive = prompt_pick_property_from_hand(selected_player)
 
             selected_player['public_hand'].remove(selected_card_receive)
             player['public_hand'].append(selected_card_receive)
@@ -555,6 +553,10 @@ def deal_breaker(player, players, deal_breaker_card, discard_deck):
                     if color_set[1] > 0:
                         other_players_with_sets.append(other_player)
                         break
+            if not other_players:
+                print('No other players with sets! Deal breaker is played as money')
+                place_money(player, deal_breaker_card)
+                return
             selected_player = [prompt_pick_player(player, other_players_with_sets)][0]
             if prompt_say_no(player, selected_player, discard_deck, deal_breaker_card):
                 player['private_hand'].remove(deal_breaker_card)
@@ -572,8 +574,8 @@ def deal_breaker(player, players, deal_breaker_card, discard_deck):
         elif user_input == '2':
             place_money(player, deal_breaker_card)
             return
-    else:
-        print("Invalid input. Please enter a valid number.")
+        else:
+            print("Invalid input. Please enter a valid number.")
 
 
 # Just say no function
@@ -638,7 +640,7 @@ def player_decision(player):
 
 
 # Function for setting up a new game
-def game_setup():
+def game_setup(test_deck = None):
     print('Welcome to Monopoly Deal! Complete three property sets to win.\n')
 
     # Continuously prompt for the number of players until a valid response is given
@@ -666,7 +668,7 @@ def game_setup():
                 'Yellow': [0, 0, 3],
                 'Light Blue': [0, 0, 3],
                 'Black': [0, 0, 4],
-                'Brown': [0, 0, 1],
+                'Brown': [0, 0, 2],
                 'Green': [0, 0, 3],
                 'Purple': [0, 0, 3],
                 'Orange': [0, 0, 3],
@@ -678,8 +680,12 @@ def game_setup():
         players.append(player)
 
     # Create & shuffle the deck, deal 5 cards to each player
-    deck = create_deck()
-    shuffle_deck(deck)
+    if test_deck:
+        deck = create_deck(test_deck)
+    else:
+        deck = create_deck(card_info.card_list)
+        shuffle_deck(deck)
+
     discard_deck = []
 
     for player in players:
@@ -700,7 +706,7 @@ def run_game():
 
             while True:
                 update_property_count(players)
-                if player['move_count'] == 3:
+                if player['move_count'] >= 3:
                     break
                 else:
                     decision = player_decision(player)

@@ -84,30 +84,20 @@ card_list = [
 
 ]
 
-test_card_list = [
-    ['Illinois Avenue', 'Property', ['Red'], 'Red', 3, 3],
-    ['Rent - Red & Yellow', 'Rent', ['Red', 'Yellow'], 'None', 1, 1],
-    ['Double the Rent', 'Action', ['None'], 'None', 1, 1],
-    ['House', 'House', ['None'], 'None', 3, 1],
-    ['Hotel', 'Hotel', ['None'], 'None', 4, 1],
-
-
-    ['Birthday!', 'Action', ['None'], 'None', 2, 2],
-    ['Deal Breaker', 'Action', ['None'], 'None', 5, 2],
-
-
-    ['Just Say No', 'Action', ['None'], 'None', 4, 2],
-    ['Sly Deal', 'Action', ['None'], 'None', 3, 3],
-    ['Forced Deal', 'Action', ['None'], 'None', 3, 3],
-    ['Debt Collector', 'Action', ['None'], 'None', 3, 3],
-
-
-
+test_card_list_1 = [
+    ['Wild Property', 'Property', ['Red', 'Yellow', 'Light Blue', 'Black', 'Brown', 'Green', 'Purple', 'Orange',
+                                   'Dark Blue', 'Electric', 'Water'], 'None', 0, 2],
+    ['Water Works', 'Property', ['Water'], 'Water', 2, 1],
+    ['Electric Company', 'Property', ['Electric'], 'Electric', 2, 1],
+    ['Red & Yellow Wild', 'Property', ['Red', 'Yellow'], 'None', 3, 2],
+    ['Indiana Avenue', 'Property', ['Red'], 'Red', 3, 1],
+    ['Illinois Avenue', 'Property', ['Red'], 'Red', 3, 1],
+    ['Kentucky Avenue', 'Property', ['Red'], 'Red', 3, 1],
     ['Marvin Gardens', 'Property', ['Yellow'], 'Yellow', 3, 1],
     ['Marvin Gardens', 'Property', ['Yellow'], 'Yellow', 3, 1],
     ['Atlantic Avenue', 'Property', ['Yellow'], 'Yellow', 3, 1],
+    ['Oriental Avenue', 'Property', ['Light Blue'], 'Light Blue', 1, 1],
     ['Vermont Avenue', 'Property', ['Light Blue'], 'Light Blue', 1, 1],
-    ['Just Say No', 'Action', ['None'], 'None', 4, 3],
     ['Connecticut Avenue', 'Property', ['Light Blue'], 'Light Blue', 1, 1],
     ['Light Blue & Black Wild', 'Property', ['Light Blue', 'Black'], 'None', 4, 1],
     ['Light Blue & Brown Wild', 'Property', ['Light Blue', 'Brown'], 'None', 1, 1],
@@ -133,17 +123,23 @@ test_card_list = [
     ['Boardwalk', 'Property', ['Dark Blue'], 'Dark Blue', 4, 1],
     ['Park Place', 'Property', ['Dark Blue'], 'Dark Blue', 4, 1],
 
-
+    ['Rent - Wild', 'Rent', ['Red', 'Yellow', 'Light Blue', 'Black', 'Brown', 'Green', 'Purple', 'Orange',
+                             'Dark Blue', 'Electric', 'Water'], 'None', 3, 3],
+    ['Rent - Red & Yellow', 'Rent', ['Red', 'Yellow'], 'None', 1, 2],
     ['Rent - Dark Blue & Green', 'Rent', ['Dark Blue', 'Green'], 'None', 1, 2],
     ['Rent - Orange & Purple', 'Rent', ['Orange', 'Purple'], 'None', 1, 2],
     ['Rent - Light Blue & Brown', 'Rent', ['Light Blue', 'Brown'], 'None', 1, 2],
     ['Rent - Black & Electric', 'Rent', ['Black', 'Electric'], 'None', 1, 1],
-
+    ['Rent - Black & Water', 'Rent', ['Black', 'Water'], 'None', 1, 1],
 
     ['Pass Go', 'Action', ['None'], 'None', 1, 10],
-
-
-
+    ['Birthday!', 'Action', ['None'], 'None', 2, 3],
+    ['Debt Collector', 'Action', ['None'], 'None', 3, 3],
+    ['Sly Deal', 'Action', ['None'], 'None', 3, 3],
+    ['Forced Deal', 'Action', ['None'], 'None', 3, 3],
+    ['Just Say No', 'Action', ['None'], 'None', 4, 3],
+    ['Deal Breaker', 'Action', ['None'], 'None', 5, 2],
+    ['Double the Rent', 'Action', ['None'], 'None', 1, 2],
 
     ['$1', 'Money', ['None'], 'None', 1, 6],
     ['$2', 'Money', ['None'], 'None', 2, 5],
@@ -152,8 +148,7 @@ test_card_list = [
     ['$5', 'Money', ['None'], 'None', 5, 2],
     ['$10', 'Money', ['None'], 'None', 10, 1],
 
-
-    ['Water Works', 'Property', ['Water'], 'Water', 2, 1],
-    ['Electric Company', 'Property', ['Electric'], 'Electric', 2, 1]
+    ['House', 'House', ['None'], 'None', 3, 3],
+    ['Hotel', 'Hotel', ['None'], 'None', 4, 2]
 
 ]
