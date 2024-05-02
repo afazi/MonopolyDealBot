@@ -6,7 +6,7 @@ from src import card_info
 
 
 class TestGameLogic(unittest.TestCase):
-    @mock.patch('builtins.input', side_effect=['3'])
+    @mock.patch('builtins.input', side_effect=['3', 'human', 'human', 'human'])
     def test_game_setup_valid_input(self, mocked_input):
         with mock.patch('sys.stdout', new=StringIO()) as mock_stdout:
             unshuffled_deck = card_info.card_list
@@ -30,7 +30,7 @@ class TestGameLogic(unittest.TestCase):
             self.assertEqual(players[2]['private_hand'][4], player3_private_hand_5)
             self.assertEqual(players[0]['move_count'], 0)
 
-    @mock.patch('builtins.input', side_effect=['invalid', '4'])
+    @mock.patch('builtins.input', side_effect=['invalid', '4', 'human', 'human', 'human', 'human'])
     def test_game_setup_invalid_non_integer_input(self, mocked_input):
         with mock.patch('sys.stdout', new=StringIO()) as mock_stdout:
             players, deck, discard_deck = game_logic.game_setup()
@@ -40,7 +40,7 @@ class TestGameLogic(unittest.TestCase):
             self.assertEqual(len(deck), 86)
             self.assertEqual(len(discard_deck), 0)
 
-    @mock.patch('builtins.input', side_effect=['7', '0', '1', '6', '5'])
+    @mock.patch('builtins.input', side_effect=['7', '0', '1', '6', '5', 'bot', 'bot', 'bot', 'bot', 'bot'])
     def test_game_setup_invalid_input_out_of_range(self, mocked_input):
         with mock.patch('sys.stdout', new=StringIO()) as mock_stdout:
             players, deck, discard_deck = game_logic.game_setup()

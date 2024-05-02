@@ -1,8 +1,9 @@
 import random
 import card_info
+import enemy_logic
 
 
-# Functions for creating the deck and cards
+# Functions for creating the deck, cards, and players
 def create_card(name, card_type, colors_available, active_color, value):
     return {'name': name, 'card_type': card_type, 'colors_available': colors_available, 'active_color': active_color,
             'value': value}
@@ -28,6 +29,35 @@ def reset_deck(deck, discard_deck):
     discard_deck.clear()
 
 
+def create_players(number_of_players, player_types):
+    players = []  # List to store player objects
+    for i in range(number_of_players):
+        name = f"Player {i + 1}"
+        player = {
+            'name': name,
+            'player_type': player_types[i],
+            'public_hand': [],
+            'private_hand': [],
+            'move_count': 0,
+            # Property sets structured as color: [properties, sets, set_requirement]
+            'property_sets': {
+                'Red': [0, 0, 3],
+                'Yellow': [0, 0, 3],
+                'Light Blue': [0, 0, 3],
+                'Black': [0, 0, 4],
+                'Brown': [0, 0, 2],
+                'Green': [0, 0, 3],
+                'Purple': [0, 0, 3],
+                'Orange': [0, 0, 3],
+                'Dark Blue': [0, 0, 2],
+                'Electric': [0, 0, 2],
+                'Water': [0, 0, 2]
+            }
+        }
+        players.append(player)
+    return players
+
+
 # Functions for moving cards
 def draw_cards(deck, player, cards_number):
     for _ in range(cards_number):
@@ -47,19 +77,60 @@ def discard_card(player, discard_deck):
         discard_deck.append(card)
         player['private_hand'].remove(card)
 
-    action_prompt = "Which card would you like to discard? \n"
+    if player['player_type'] == 'human':
+        action_prompt = "Which card would you like to discard? \n"
 
-    for i, card in enumerate(player['private_hand']):
-        action_prompt += "Enter '{}': {}\n".format(i, card['name'])
+        for i, card in enumerate(player['private_hand']):
+            action_prompt += "Enter '{}': {}\n".format(i, card['name'])
 
-    while True:  # Keep prompting until valid input is provided
-        user_input = input(action_prompt)
-        if user_input.isdigit() and 0 <= int(user_input) < len(player['private_hand']):
-            selected_card = player['private_hand'][int(user_input)]
-            discard_card_helper(selected_card, player, discard_deck)
-            break  # Exit the loop once a valid card is selected and discarded
-        else:
-            print("Invalid input. Please enter a valid number.")
+        while True:  # Keep prompting until valid input is provided
+            user_input = input(action_prompt)
+            if user_input.isdigit() and 0 <= int(user_input) < len(player['private_hand']):
+                selected_card = player['private_hand'][int(user_input)]
+                discard_card_helper(selected_card, player, discard_deck)
+                break  # Exit the loop once a valid card is selected and discarded
+            else:
+                print("Invalid input. Please enter a valid number.")
+    else:
+        selected_card = enemy_logic.discard_card(player)
+        discard_card_helper(selected_card, player, discard_deck)
+
+
+# Function for setting up a new game
+def game_setup(test_deck=None):
+    print('Welcome to Monopoly Deal! Complete three property sets to win.\n')
+
+    # Continuously prompt for the number of players until a valid response is given
+    while True:
+        try:
+            number_of_players = int(input("How many players? Pick between 2 and 5: "))
+            if 2 <= number_of_players <= 5:
+                break  # Exit the loop if a valid number of players is provided
+            else:
+                print("Please enter a number between 2 and 5.")
+        except ValueError:
+            print("Please enter a valid integer.")
+
+    player_types = []
+    for i in range(number_of_players):
+        player_type = input(f"Is Player {i + 1} a human or a bot? (enter 'human' or 'bot'): ")
+        player_types.append(player_type)
+
+    players = create_players(number_of_players, player_types)
+
+    # Create & shuffle the deck, deal 5 cards to each player
+    if test_deck:
+        deck = create_deck(test_deck)
+    else:
+        deck = create_deck(card_info.card_list)
+        shuffle_deck(deck)
+
+    discard_deck = []
+
+    for player in players:
+        draw_cards(deck, player, 5)
+
+    return players, deck, discard_deck
 
 
 # Function to prompt the player to choose another player
@@ -637,61 +708,6 @@ def player_decision(player):
             return selected_action
         else:
             print("Invalid input. Please enter a valid number.")
-
-
-# Function for setting up a new game
-def game_setup(test_deck = None):
-    print('Welcome to Monopoly Deal! Complete three property sets to win.\n')
-
-    # Continuously prompt for the number of players until a valid response is given
-    while True:
-        try:
-            number_of_players = int(input("How many players? Pick between 2 and 5: "))
-            if 2 <= number_of_players <= 5:
-                break  # Exit the loop if a valid number of players is provided
-            else:
-                print("Please enter a number between 2 and 5.")
-        except ValueError:
-            print("Please enter a valid integer.")
-
-    players = []  # List to store player objects
-    for i in range(1, number_of_players + 1):
-        name = f"Player {i}"
-        player = {
-            'name': name,
-            'public_hand': [],
-            'private_hand': [],
-            'move_count': 0,
-            # Property sets structured as color: [properties, sets, set_requirement]
-            'property_sets': {
-                'Red': [0, 0, 3],
-                'Yellow': [0, 0, 3],
-                'Light Blue': [0, 0, 3],
-                'Black': [0, 0, 4],
-                'Brown': [0, 0, 2],
-                'Green': [0, 0, 3],
-                'Purple': [0, 0, 3],
-                'Orange': [0, 0, 3],
-                'Dark Blue': [0, 0, 2],
-                'Electric': [0, 0, 2],
-                'Water': [0, 0, 2]
-            }
-        }
-        players.append(player)
-
-    # Create & shuffle the deck, deal 5 cards to each player
-    if test_deck:
-        deck = create_deck(test_deck)
-    else:
-        deck = create_deck(card_info.card_list)
-        shuffle_deck(deck)
-
-    discard_deck = []
-
-    for player in players:
-        draw_cards(deck, player, 5)
-
-    return players, deck, discard_deck
 
 
 # Loop to run actual gameplay
