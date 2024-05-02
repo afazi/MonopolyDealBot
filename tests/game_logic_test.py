@@ -49,6 +49,15 @@ class TestGameLogic(unittest.TestCase):
             self.assertEqual(len(players), 5)
             self.assertEqual(len(deck), 81)
 
+    @mock.patch('builtins.input', side_effect=['7', '0', '1', '6', '5', 'bot', 'bot', 'bot', 'bot', 'bot'])
+    def test_game_setup_invalid_input_out_of_range(self, mocked_input):
+        with mock.patch('sys.stdout', new=StringIO()) as mock_stdout:
+            players, deck, discard_deck = game_logic.game_setup()
+            output = mock_stdout.getvalue().strip()
+            self.assertIn("Please enter a number between 2 and 5.", output)
+            self.assertEqual(len(players), 5)
+            self.assertEqual(len(deck), 81)
+
 
 
 if __name__ == '__main__':
